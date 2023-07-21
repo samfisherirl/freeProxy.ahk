@@ -1,9 +1,13 @@
-﻿
+﻿ProxyProp := freeProxy.retreive("US") ;united states can be passed but takes more time
+Msgbox(ProxyProp.IP ":" ProxyProp.Port)
+Msgbox(ProxyProp.str)
+Msgbox(ProxyProp.https) 
 
 /*
     example
     ProxyProp := freeProxy.retreive("US") ;united states can be passed but takes more time
-
+    Map("JP", "Japan", "US", "United States", "UK", "United Kingdom", "BO", "Bolivia", "HK", "Hong Kong", "FR", "France", "CA", "Canada", "SG", "Singapore", "IN", "India", "ID", "Indonesia", "RU", "Russian", "DE", "Germany", "TH", "Thailand", "EG", "Egypt")
+    
     Msgbox(ProxyProp.IP ":" ProxyProp.Port)
     Msgbox(ProxyProp.str)
     Msgbox(ProxyProp.https) => true/false
@@ -84,6 +88,16 @@ class freeProxy
         str := StrReplace(str, "<td class='hx'>", "|,>>>")
         return str
     }
+    /*
+    <td>172.104.97.150</td>
+    <td>32539</td>
+    <td>JP</td>
+    <td class="hm">Japan</td>
+    <td>elite proxy</td>
+    <td class="hm">no</td>
+    <td class="hx">yes</td> => https status
+    <td class="hm">12 secs ago</td>
+    */
     static divideTable(cleanedStr) {
         mapOfProps := freeProxy.defineIPMap(freeProxy.returnCountries())
         stringAr := StrSplit(cleanedStr, "|,")
