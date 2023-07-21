@@ -23,7 +23,7 @@ free working proxy from https://www.sslproxies.org/
 
 # todo 
 
-add other sites: https://www.us-proxy.org/, https://free-proxy-list.net/uk-proxy.html and https://free-proxy-list.net 
-add elite/anon status
-https status
-concatenate string
+- add other sites: https://www.us-proxy.org/, https://free-proxy-list.net/uk-proxy.html and https://free-proxy-list.net 
+- add elite/anon status
+- https status
+- concatenate string
