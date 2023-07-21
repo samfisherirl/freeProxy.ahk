@@ -12,7 +12,9 @@
 
 ProxyProp := freeProxy.retreive("US") ; full country list in class, full names can be passed but takes longer
 
-Msgbox(ProxyProp.IP ":" ProxyProp.Port)
+ Msgbox(ProxyProp.IP ":" ProxyProp.Port)
+ Msgbox(ProxyProp.str)
+ Msgbox(ProxyProp.https) => true/false
 
 ```
 # notes
