@@ -8,18 +8,18 @@
 
 ```autohotkey
 
- example 1:
-     proxyProp := freeProxy.retreive("US")
-     ; united states can be passed but takes more time
-     msgStr := proxyProp.IP ":" proxyProp.Port "`nHttps status: "
-     msgStr .= ProxyProp.https ? "true" : "false"
-     Msgbox(msgStr)
+     example 1:
+         proxyProp := freeProxy.get("US")
+         ; united states can be passed but takes more time
+         msgStr := proxyProp.IP ":" proxyProp.Port "`nHttps status: "
+         msgStr .= ProxyProp.https ? "true" : "false"
+         Msgbox(msgStr)
 
- example 2:
-     proxyArrayofProps := freeProxy.retreive("US", arrayMode := 1) 
-     ; ArrayMode provides entire list of proxies for the user to manipulate
+     example 2:
+         proxyArrayofProps := freeProxy.get("US", arrayMode := 1) 
+         ; ArrayMode provides entire list of proxies for the user to manipulate
 
-     Msgbox(proxyArrayofProps[2].IP ":" ProxyArrayofProps[2].Port)
+         Msgbox(proxyArrayofProps[2].IP ":" ProxyArrayofProps[2].Port)
 
 ```
 # notes
