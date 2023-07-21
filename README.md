@@ -1,8 +1,10 @@
 # freeProxy.ahk
 
-inspired by https://pypi.org/project/free-proxy/
+- inspired by https://pypi.org/project/free-proxy/
 
-credit to thqby for winhttprequest https://github.com/thqby/ahk2_lib/blob/master/WinHttpRequest.ahk
+- free working proxy from https://www.sslproxies.org/
+
+- credit to thqby for winhttprequest https://github.com/thqby/ahk2_lib/blob/master/WinHttpRequest.ahk
 
 ```autohotkey
 
@@ -17,9 +19,7 @@ Msgbox(ProxyProp.IP ":" ProxyProp.Port)
 
 - Provide abbreviated country code for faster return
 - Currently, a random number is used to return a Proxy from an array of proxies. 
-
-inspired by https://pypi.org/project/free-proxy/
-free working proxy from https://www.sslproxies.org/
+ 
 
 # todo 
 
