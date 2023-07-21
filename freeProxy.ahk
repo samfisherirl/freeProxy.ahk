@@ -1,8 +1,8 @@
+﻿
 
 /*
     example
     ProxyProp := freeProxy.retreive("US") ;united states can be passed but takes more time
-    Map("JP", "Japan", "US", "United States", "UK", "United Kingdom", "BO", "Bolivia", "HK", "Hong Kong", "FR", "France", "CA", "Canada", "SG", "Singapore", "IN", "India", "ID", "Indonesia", "RU", "Russian", "DE", "Germany", "TH", "Thailand", "EG", "Egypt")
 
     Msgbox(ProxyProp.IP ":" ProxyProp.Port)
     Msgbox(ProxyProp.str)
@@ -40,9 +40,21 @@ class freeProxy
         } else {
             country := countryCheck
         }
+        ;first time for general list of proxies
         sslProxyText := freeProxy.grabWeb("https://www.sslproxies.org/")
         cleanedStr := freeProxy.StrReplaceTable(sslProxyText)
-        mapOfProx := freeProxy.divideTable(cleanedStr)
+        emptyMapofProps := freeProxy.defineIPMap(freeProxy.returnCountries())
+        mapOfProx := freeProxy.divideTable(cleanedStr, emptyMapofProps)
+
+        ;second time for US list of proxies 
+        backupProxyText := freeProxy.grabWeb("https://www.us-proxy.org/") 
+        cleanedStr := freeProxy.StrReplaceTable(backupProxyText, 2)
+        mapOfProx := freeProxy.divideTable(cleanedStr, mapOfProx)
+        
+        backupProxyText := freeProxy.grabWeb("https://free-proxy-list.net/uk-proxy.html") 
+        cleanedStr := freeProxy.StrReplaceTable(backupProxyText, 2)
+        mapOfProx := freeProxy.divideTable(cleanedStr, mapOfProx)
+
         return freeProxy.randomProx(mapOfProx, country)
     }
     static isAbreviatedCountry(country) {
@@ -86,12 +98,17 @@ class freeProxy
         Http.WaitForResponse()
         return Http.ResponseText
     }
-    static StrReplaceTable(str) {
+    static StrReplaceTable(str, mode := 1) {
+        fileAppend(str, "out.txt")
         local toReplace := ["<td>", "</td>", "<td class=`"hm`">"]
         for i in toReplace {
             str := StrReplace(str, i, "|,") ; |, is defined delimiter
         }
-        str := StrReplace(str, "<td class='hx'>", "|,>>>")
+        if mode = 1 {
+            str := StrReplace(str, "<td class='hx'>", "|,>>>")
+        } else {
+            str := StrReplace(str, "<td class=`"hx`">", "|,>>>")
+        }
         return str
     }
     /*
@@ -104,14 +121,14 @@ class freeProxy
     <td class="hx">yes</td> => https status
     <td class="hm">12 secs ago</td>
     */
-    static divideTable(cleanedStr) {
-        mapOfProps := freeProxy.defineIPMap(freeProxy.returnCountries())
+    static divideTable(cleanedStr, mapOfProps) {
         stringAr := StrSplit(cleanedStr, "|,")
         IP := "", port := "", country := ""
         for tableSplit in stringAr
         {
             if A_Index > 1 {
-                if InStr(tableSplit, ".") {
+                if InStr(tableSplit, ".") { 
+                    ; looks for IP address
                     lineSplit := StrSplit(tableSplit, ".")
                     if IsObject(lineSplit) && lineSplit.Length > 2 {
                         IP := tableSplit
@@ -119,17 +136,29 @@ class freeProxy
                     }
                 }
                 else if IsInteger(tableSplit) {
+                    ; looks for port (strictly integer)
                     port := tableSplit
                     continue
                 }
                 else if InStr(tableSplit, ">>>") {
+                    ;delimiter set as '>>>' for https column 
                     https := InStr(StrReplace(tableSplit, ">>>", ""), "yes") ? true : false
-                    try {
+                    if mapOfProps.Has(country) {
+                        mapOfProps[country].Push({  
+                                                    IP: IP, 
+                                                    port: port,
+                                                    https: https, 
+                                                    str: Format("{1}:{2}", IP, port)
+                                                })
+                    } else {
+                        ; in the case of unfound 
+                        mapOfProps[country] := []
+                        mapOfProps[country].Push({IP: IP, port: port, https: https, str: Format("{1}:{2}", IP, port)})
+
+                    }
                         mapOfProps[country].Push({ IP: IP, port: port,
                             https: https, str: Format("{1}:{2}", IP, port) })
-                    } catch {
-                        sleep(1)
-                    }
+                        ; no matching country, unsupport at this time
                 }
                 else {
                     countryAndStatus := freeProxy.checkForCountry(tableSplit, freeProxy.returnCountries())
