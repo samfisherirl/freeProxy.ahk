@@ -1,8 +1,8 @@
-﻿
 
 /*
     example
     ProxyProp := freeProxy.retreive("US") ;united states can be passed but takes more time
+    Map("JP", "Japan", "US", "United States", "UK", "United Kingdom", "BO", "Bolivia", "HK", "Hong Kong", "FR", "France", "CA", "Canada", "SG", "Singapore", "IN", "India", "ID", "Indonesia", "RU", "Russian", "DE", "Germany", "TH", "Thailand", "EG", "Egypt")
 
     Msgbox(ProxyProp.IP ":" ProxyProp.Port)
     Msgbox(ProxyProp.str)
@@ -11,29 +11,41 @@
     @author github.com/samfisherirl
     inspired by https://pypi.org/project/free-proxy/
     credit to thqby for winhttprequest https://github.com/thqby/ahk2_lib/blob/master/WinHttpRequest.ahk
-    class freeProxy.retreive(Country := "US") =>  
-    property.IP, 
+    class freeProxy.retreive(Country := "US") =>
+    property.IP,
     property.Port,
     property.https => true/false,
     property.str => (property.IP ":" property.Port)
 
     provide abbreviated country code for faster return
-    Currently, a random number is used to return a Proxy from 
+    Currently, a random number is used to return a Proxy from
 
     inspired by https://pypi.org/project/free-proxy/
     free working proxy from https://www.sslproxies.org/
 
-    todo: 
+    todo:
     make https an option
-    add other sites: https://www.us-proxy.org/, https://free-proxy-list.net/uk-proxy.html and https://free-proxy-list.net 
+    add other sites: https://www.us-proxy.org/, https://free-proxy-list.net/uk-proxy.html and https://free-proxy-list.net
     add elite/anon status
     https status
     concatenate string
 */
 class freeProxy
-{ 
-    static retreive(country) 
+{
+    static retreive(country)
     {
+        countryCheck := freeProxy.isAbreviatedCountry(country)
+        if (countryCheck = 0) {
+            return false
+        } else {
+            country := countryCheck
+        }
+        sslProxyText := freeProxy.grabWeb("https://www.sslproxies.org/")
+        cleanedStr := freeProxy.StrReplaceTable(sslProxyText)
+        mapOfProx := freeProxy.divideTable(cleanedStr)
+        return freeProxy.randomProx(mapOfProx, country)
+    }
+    static isAbreviatedCountry(country) {
         if not StrLen(country) < 3 {
             status := freeProxy.matchCountry(country)
             if (status = "") {
@@ -41,16 +53,14 @@ class freeProxy
                 return 0
             }
             else {
-                country := status
+                return status
             }
+        } else {
+            return country
         }
-        sslProxyText := freeProxy.grabWeb("https://www.sslproxies.org/")
-        cleanedStr := freeProxy.StrReplaceTable(sslProxyText)
-        mapOfProx := freeProxy.divideTable(cleanedStr)
-        return freeProxy.randomProx(mapOfProx, country)
     }
-    static returnCountries(){
-        return Map("JP", "Japan", "US", "United States", "UK", "United Kingdom", "BO", "Bolivia", "HK", "Hong Kong", "FR", "France", "CA", "Canada", "SG", "Singapore", "IN", "India", "ID", "Indonesia", "RU", "Russian", "DE", "Germany", "TH", "Thailand", "EG", "Egypt")
+    static returnCountries() {
+        return Map("JP", "Japan", "US", "United States", "UK", "United Kingdom", "BO", "Bolivia", "HK", "Hong Kong", "FR", "France", "CA", "Canada", "SG", "Singapore", "IN", "India", "ID", "Indonesia", "RU", "Russian", "DE", "Germany", "TH", "Thailand", "EG", "Egypt", "CA", "China")
     }
     static matchCountry(country) {
         status := false
@@ -80,10 +90,20 @@ class freeProxy
         local toReplace := ["<td>", "</td>", "<td class=`"hm`">"]
         for i in toReplace {
             str := StrReplace(str, i, "|,") ; |, is defined delimiter
-        } 
+        }
         str := StrReplace(str, "<td class='hx'>", "|,>>>")
         return str
     }
+    /*
+    <td>172.104.97.150</td>
+    <td>32539</td>
+    <td>JP</td>
+    <td class="hm">Japan</td>
+    <td>elite proxy</td>
+    <td class="hm">no</td>
+    <td class="hx">yes</td> => https status
+    <td class="hm">12 secs ago</td>
+    */
     static divideTable(cleanedStr) {
         mapOfProps := freeProxy.defineIPMap(freeProxy.returnCountries())
         stringAr := StrSplit(cleanedStr, "|,")
@@ -104,8 +124,12 @@ class freeProxy
                 }
                 else if InStr(tableSplit, ">>>") {
                     https := InStr(StrReplace(tableSplit, ">>>", ""), "yes") ? true : false
-                    mapOfProps[country].Push({IP: IP, port: port, 
-                                            https: https, str: Format("{1}:{2}", IP, port)})
+                    try {
+                        mapOfProps[country].Push({ IP: IP, port: port,
+                            https: https, str: Format("{1}:{2}", IP, port) })
+                    } catch {
+                        sleep(1)
+                    }
                 }
                 else {
                     countryAndStatus := freeProxy.checkForCountry(tableSplit, freeProxy.returnCountries())
@@ -144,7 +168,7 @@ class freeProxy
         }
         return [false]
     }
-    static randomProx(mapOfProx, country){
+    static randomProx(mapOfProx, country) {
         len := mapOfProx[country].Length
         ran := Random(1, len)
         return mapOfProx[country][ran]
