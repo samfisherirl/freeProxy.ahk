@@ -8,7 +8,7 @@ credit to thqby for winhttprequest https://github.com/thqby/ahk2_lib/blob/master
 
 ; example
 
-ProxyProp := freeProxy.retreive("United States")
+ProxyProp := freeProxy.retreive("US") ; full country list in class, full names can be passed but takes longer
 
 Msgbox(ProxyProp.IP ":" ProxyProp.Port)
 
