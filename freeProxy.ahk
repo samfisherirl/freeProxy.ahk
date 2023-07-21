@@ -112,7 +112,6 @@ class freeProxy
         return Http.ResponseText
     }
     static StrReplaceTable(str, mode := 1) {
-        fileAppend(str, "out.txt")
         local toReplace := ["<td>", "</td>", "<td class=`"hm`">"]
         for i in toReplace {
             str := StrReplace(str, i, "|,") ; |, is defined delimiter
