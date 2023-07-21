@@ -1,3 +1,4 @@
+﻿
 
 /*
     example
@@ -18,6 +19,9 @@
 
     provide abbreviated country code for faster return
     Currently, a random number is used to return a Proxy from 
+
+    inspired by https://pypi.org/project/free-proxy/
+    free working proxy from https://www.sslproxies.org/
 
     todo: 
     make https an option
