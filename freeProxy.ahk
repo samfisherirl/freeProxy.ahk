@@ -1,12 +1,23 @@
 ﻿
-
 /*
-    example
-    ProxyProp := freeProxy.retreive("US") ;united states can be passed but takes more time
+    example 1:
+        proxyProp := freeProxy.retreive("US")
+        ; united states can be passed but takes more time
+        msgStr := proxyProp.IP ":" proxyProp.Port "`nHttps status: "
+        msgStr .= ProxyProp.https ? "true" : "false"
+        Msgbox(msgStr)
+
+    example 2:
+        proxyArrayofProps := freeProxy.retreive("US", arrayMode := 1) 
+        ; ArrayMode provides entire list of proxies for the user to manipulate
+
+        Msgbox(proxyArrayofProps[2].IP ":" ProxyArrayofProps[2].Port)
 
     Msgbox(ProxyProp.IP ":" ProxyProp.Port)
     Msgbox(ProxyProp.str)
     Msgbox(ProxyProp.https) => true/false
+
+    Map("JP", "Japan", "US", "United States", "UK", "United Kingdom", "BO", "Bolivia", "HK", "Hong Kong", "FR", "France", "CA", "Canada", "SG", "Singapore", "IN", "India", "ID", "Indonesia", "RU", "Russian", "DE", "Germany", "TH", "Thailand", "EG", "Egypt", "CN", "China")
 
     @author github.com/samfisherirl
     inspired by https://pypi.org/project/free-proxy/
@@ -32,7 +43,7 @@
 */
 class freeProxy
 {
-    static retreive(country)
+    static retreive(country, arrayMode := 0)
     {
         countryCheck := freeProxy.isAbreviatedCountry(country)
         if (countryCheck = 0) {
@@ -40,22 +51,24 @@ class freeProxy
         } else {
             country := countryCheck
         }
-        ;first time for general list of proxies
-        sslProxyText := freeProxy.grabWeb("https://www.sslproxies.org/")
-        cleanedStr := freeProxy.StrReplaceTable(sslProxyText)
         emptyMapofProps := freeProxy.defineIPMap(freeProxy.returnCountries())
-        mapOfProx := freeProxy.divideTable(cleanedStr, emptyMapofProps)
-
+        ;first time for general list of proxies
+        mapOfProx := freeProxy.extract("https://www.sslproxies.org/", emptyMapofProps)
         ;second time for US list of proxies 
-        backupProxyText := freeProxy.grabWeb("https://www.us-proxy.org/") 
-        cleanedStr := freeProxy.StrReplaceTable(backupProxyText, 2)
-        mapOfProx := freeProxy.divideTable(cleanedStr, mapOfProx)
-        
-        backupProxyText := freeProxy.grabWeb("https://free-proxy-list.net/uk-proxy.html") 
-        cleanedStr := freeProxy.StrReplaceTable(backupProxyText, 2)
-        mapOfProx := freeProxy.divideTable(cleanedStr, mapOfProx)
-
-        return freeProxy.randomProx(mapOfProx, country)
+        mapOfProx := freeProxy.extract("https://www.us-proxy.org/", mapOfProx)
+        ;third pass for UK
+        mapOfProx := freeProxy.extract("https://free-proxy-list.net/uk-proxy.html", mapOfProx)
+        if (arrayMode = 0) {
+            return freeProxy.randomProx(mapOfProx, country)
+        }
+        else if (arrayMode = 1) {
+            return mapOfProx[country]
+        }
+    }
+    static extract(url, mapofProps){
+        sslProxyText := freeProxy.grabWeb(url)
+        cleanedStr := freeProxy.StrReplaceTable(sslProxyText)
+        return freeProxy.divideTable(cleanedStr, mapofProps) ; => Map([{}])
     }
     static isAbreviatedCountry(country) {
         if not StrLen(country) < 3 {
@@ -207,56 +220,16 @@ class freeProxy
 
 
 class WinHttpRequest {
-    static AutoLogonPolicy := {
-        Always: 0,
-        OnlyIfBypassProxy: 1,
-        Never: 2
+    static AutoLogonPolicy := { Always: 0, OnlyIfBypassProxy: 1, Never: 2 }
+    static Option := { UserAgentString: 0, URL: 1, URLCodePage: 2, EscapePercentInURL: 3, SslErrorIgnoreFlags: 4, SelectCertificate: 5, EnableRedirects: 6, UrlEscapeDisable: 7, UrlEscapeDisableQuery: 8, SecureProtocols: 9, EnableTracing: 10, RevertImpersonationOverSsl: 11, EnableHttpsToHttpRedirects: 12, EnablePassportAuthentication: 13, MaxAutomaticRedirects: 14, MaxResponseHeaderSize: 15, MaxResponseDrainSize: 16, EnableHttp1_1: 17, EnableCertificateRevocationCheck: 18, RejectUserpwd: 19
     }
-    static Option := {
-        UserAgentString: 0,
-        URL: 1,
-        URLCodePage: 2,
-        EscapePercentInURL: 3,
-        SslErrorIgnoreFlags: 4,
-        SelectCertificate: 5,
-        EnableRedirects: 6,
-        UrlEscapeDisable: 7,
-        UrlEscapeDisableQuery: 8,
-        SecureProtocols: 9,
-        EnableTracing: 10,
-        RevertImpersonationOverSsl: 11,
-        EnableHttpsToHttpRedirects: 12,
-        EnablePassportAuthentication: 13,
-        MaxAutomaticRedirects: 14,
-        MaxResponseHeaderSize: 15,
-        MaxResponseDrainSize: 16,
-        EnableHttp1_1: 17,
-        EnableCertificateRevocationCheck: 18,
-        RejectUserpwd: 19
+    static PROXYSETTING := { PRECONFIG: 0, DIRECT: 1, PROXY: 2
     }
-    static PROXYSETTING := {
-        PRECONFIG: 0,
-        DIRECT: 1,
-        PROXY: 2
+    static SETCREDENTIALSFLAG := { SERVER: 0, PROXY: 1
     }
-    static SETCREDENTIALSFLAG := {
-        SERVER: 0,
-        PROXY: 1
+    static SecureProtocol := { SSL2: 0x08, SSL3: 0x20, TLS1: 0x80, TLS1_1: 0x200, TLS1_2: 0x800, All: 0xA8
     }
-    static SecureProtocol := {
-        SSL2: 0x08,
-        SSL3: 0x20,
-        TLS1: 0x80,
-        TLS1_1: 0x200,
-        TLS1_2: 0x800,
-        All: 0xA8
-    }
-    static SslErrorFlag := {
-        UnknownCA: 0x0100,
-        CertWrongUsage: 0x0200,
-        CertCNInvalid: 0x1000,
-        CertDateInvalid: 0x2000,
-        Ignore_All: 0x3300
+    static SslErrorFlag := { UnknownCA: 0x0100, CertWrongUsage: 0x0200, CertCNInvalid: 0x1000, CertDateInvalid: 0x2000, Ignore_All: 0x3300
     }
 
     __New(UserAgent := unset) {
