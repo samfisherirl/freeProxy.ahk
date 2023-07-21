@@ -1,20 +1,20 @@
-﻿
+
 /*
-    example 1:
-        proxyProp := freeProxy.retreive("US")
-        ; united states can be passed but takes more time
-        msgStr := proxyProp.IP ":" proxyProp.Port "`nHttps status: "
-        msgStr .= ProxyProp.https ? "true" : "false"
-        Msgbox(msgStr)
+        example 1:
+            proxyProp := freeProxy.get("US")
+            ; united states can be passed but takes more time
+            msgStr := proxyProp.IP ":" proxyProp.Port "`nHttps status: "
+            msgStr .= ProxyProp.https ? "true" : "false"
+            Msgbox(msgStr)
 
-    example 2:
-        proxyArrayofProps := freeProxy.retreive("US", arrayMode := 1) 
-        ; ArrayMode provides entire list of proxies for the user to manipulate
+        example 2:
+            proxyArrayofProps := freeProxy.get("US", arrayMode := 1) 
+            ; ArrayMode provides entire list of proxies for the user to manipulate
 
-        Msgbox(proxyArrayofProps[2].IP ":" ProxyArrayofProps[2].Port)
+            Msgbox(proxyArrayofProps[2].IP ":" ProxyArrayofProps[2].Port)
 
     Msgbox(ProxyProp.IP ":" ProxyProp.Port)
-    Msgbox(ProxyProp.str)
+    Msgbox(ProxyProp.str) => concatenated string
     Msgbox(ProxyProp.https) => true/false
 
     Map("JP", "Japan", "US", "United States", "UK", "United Kingdom", "BO", "Bolivia", "HK", "Hong Kong", "FR", "France", "CA", "Canada", "SG", "Singapore", "IN", "India", "ID", "Indonesia", "RU", "Russian", "DE", "Germany", "TH", "Thailand", "EG", "Egypt", "CN", "China")
@@ -22,7 +22,7 @@
     @author github.com/samfisherirl
     inspired by https://pypi.org/project/free-proxy/
     credit to thqby for winhttprequest https://github.com/thqby/ahk2_lib/blob/master/WinHttpRequest.ahk
-    class freeProxy.retreive(Country := "US") =>
+    class freeProxy.get(Country := "US") =>
     property.IP,
     property.Port,
     property.https => true/false,
@@ -43,7 +43,7 @@
 */
 class freeProxy
 {
-    static retreive(country, arrayMode := 0)
+    static get(country, arrayMode := 0)
     {
         countryCheck := freeProxy.isAbreviatedCountry(country)
         if (countryCheck = 0) {
